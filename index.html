@@ -1,0 +1,2073 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>GrowthPilot – Control Tower Marketing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+
+  <style>
+    :root {
+      --bg: #f5f6fb;
+      --bg-elevated: #ffffff;
+      --accent: #2563eb;
+      --accent-soft: rgba(37, 99, 235, 0.08);
+      --accent-strong: rgba(37, 99, 235, 0.15);
+      --text-main: #0f172a;
+      --text-soft: #6b7280;
+      --border-subtle: #e5e7eb;
+      --shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.08);
+      --radius-xl: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 50%, #f5f5ff 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-top: 80px; /* espacio para la barra superior fija */
+    }
+
+    /* ---------- TOP NAV ---------- */
+
+    .top-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 72px;
+      background: #ffffffcc;
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      z-index: 30;
+    }
+
+    .top-nav-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .nav-logo-square {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      border: 1.5px solid #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .nav-logo-text {
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-size: 13px;
+    }
+
+    .top-nav-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-tab {
+      border-radius: 999px;
+      border: 1px solid #0f172a;
+      font-size: 14px;
+      padding: 8px 18px;
+      background: #ffffff;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      min-width: 110px;
+    }
+
+    .nav-tab + .nav-tab {
+      margin-left: 8px;
+    }
+
+    .nav-tab.active {
+      background: #0f172a;
+      color: #ffffff;
+    }
+
+    .nav-tab:not(.active):hover {
+      background: #f3f4f6;
+    }
+
+    @media (max-width: 640px) {
+      .top-nav {
+        padding: 0 16px;
+      }
+      .nav-tab {
+        padding: 6px 12px;
+        min-width: auto;
+        font-size: 13px;
+      }
+      .nav-logo-text {
+        display: none;
+      }
+    }
+
+    /* ---------- SECCIONES PRINCIPALES ---------- */
+
+    section {
+      width: 100%;
+    }
+
+    #landing {
+      padding: 40px 60px 60px;
+    }
+
+    @media (max-width: 900px) {
+      #landing {
+        padding: 28px 18px 40px;
+      }
+    }
+
+    /* ---------- LANDING / HERO ---------- */
+
+    .hero-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 40px;
+      align-items: center;
+    }
+
+    .hero-logo-block {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .hero-logo-square {
+      width: 110px;
+      height: 110px;
+      border-radius: 18px;
+      border: 2px solid #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      font-weight: 600;
+    }
+
+    .hero-logo-text {
+      font-size: 46px;
+      line-height: 1;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .hero-copy h2 {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .hero-copy p {
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--text-soft);
+      margin-bottom: 4px;
+      max-width: 540px;
+    }
+
+    .hero-copy p strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .hero-buttons {
+      margin-top: 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-primary {
+      border-radius: 999px;
+      border: none;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 10px 22px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 15px 35px rgba(15, 23, 42, 0.35);
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.45);
+      background: #020617;
+    }
+
+    .btn-secondary {
+      border-radius: 999px;
+      border: 1px solid #0f172a;
+      background: transparent;
+      padding: 9px 18px;
+      font-size: 14px;
+      cursor: pointer;
+      color: #0f172a;
+    }
+
+    .hero-meta {
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--text-soft);
+    }
+
+    .hero-screen-wrapper {
+      justify-self: center;
+    }
+
+    .hero-laptop {
+      width: 520px;
+      max-width: 100%;
+      border-radius: 20px;
+      padding: 14px 18px 18px;
+      background: linear-gradient(145deg, #111827, #1f2937);
+      box-shadow: 0 25px 60px rgba(15, 23, 42, 0.55);
+      position: relative;
+    }
+
+    .hero-laptop-top {
+      height: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .hero-camera-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #111827;
+      border: 2px solid #4b5563;
+    }
+
+    .hero-screen {
+      border-radius: 12px;
+      overflow: hidden;
+      background: #f9fafb;
+      border: 1px solid #111827;
+    }
+
+    .hero-screen-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 10px;
+      background: #0f172a;
+      color: #e5e7eb;
+      font-size: 11px;
+    }
+
+    .hero-screen-content {
+      padding: 10px 12px 12px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    .hero-mini-chart,
+    .hero-mini-card {
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      height: 110px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-mini-chart::after {
+      content: "";
+      position: absolute;
+      inset: 12px 12px auto auto;
+      width: 90px;
+      height: 44px;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(16, 185, 129, 0.2));
+      border-radius: 999px;
+      filter: blur(4px);
+    }
+
+    .hero-mini-card::before {
+      content: "ROAS global 4,3×";
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      font-size: 11px;
+      font-weight: 500;
+      color: #4b5563;
+    }
+
+    .hero-mini-card::after {
+      content: "CPA moyen 42 €";
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      font-size: 11px;
+      color: #6b7280;
+    }
+
+    .hero-laptop-base {
+      margin-top: 12px;
+      height: 20px;
+      border-radius: 0 0 16px 16px;
+      background: radial-gradient(circle at top, #9ca3af, #111827);
+    }
+
+    @media (max-width: 900px) {
+      .hero-layout {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+      .hero-screen-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ---------- WEB APP (DASHBOARD) ---------- */
+
+    #webapp {
+      display: none; /* por defecto mostramos la landing */
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      min-height: calc(100vh - 80px);
+    }
+
+    aside {
+      backdrop-filter: blur(28px);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.96));
+      color: white;
+      padding: 22px 18px;
+      border-right: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 26px;
+    }
+
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 25% 0, #93c5fd, #2563eb);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .logo-text-main {
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      font-size: 14px;
+      text-transform: uppercase;
+    }
+
+    .logo-text-sub {
+      font-size: 11px;
+      opacity: 0.7;
+    }
+
+    .sidebar-section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: rgba(148, 163, 184, 0.9);
+      margin: 18px 0 8px;
+    }
+
+    .nav-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-btn {
+      border: none;
+      background: transparent;
+      color: rgba(226, 232, 240, 0.86);
+      font-size: 13px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.15s ease, color 0.15s ease, transform 0.05s ease;
+    }
+
+    .nav-btn span.dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.9);
+    }
+
+    .nav-btn.active {
+      background: rgba(37, 99, 235, 0.18);
+      color: #e5edff;
+      transform: translateY(-1px);
+    }
+
+    .nav-btn.active span.dot {
+      background: #60a5fa;
+    }
+
+    .sidebar-divider {
+      height: 1px;
+      background: radial-gradient(circle, rgba(148, 163, 184, 0.8), transparent);
+      margin: 18px 0;
+    }
+
+    .sidebar-footnote {
+      font-size: 11px;
+      color: rgba(148, 163, 184, 0.8);
+      line-height: 1.4;
+      margin-top: 18px;
+    }
+
+    .sidebar-footnote strong {
+      color: #e5edff;
+      font-weight: 500;
+    }
+
+    main.dashboard-main {
+      padding: 22px 22px 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    header.main-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    .page-subtitle {
+      font-size: 13px;
+      color: var(--text-soft);
+      max-width: 520px;
+    }
+
+    .page-subtitle span {
+      background: #eef2ff;
+      padding: 2px 6px;
+      border-radius: 999px;
+      font-size: 11px;
+      margin-left: 4px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pill {
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .pill-label {
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .pill-value {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: linear-gradient(145deg, #2563eb, #7dd3fc);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+    }
+
+    .layout-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 2.1fr) minmax(320px, 1.1fr);
+      gap: 18px;
+      align-items: flex-start;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.94);
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: var(--shadow-soft);
+      padding: 16px 18px 18px;
+      backdrop-filter: blur(16px);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      gap: 10px;
+    }
+
+    .panel-title {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #4b5563;
+    }
+
+    .panel-subtitle {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .panel-badge {
+      font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 600;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .kpi-card {
+      background: linear-gradient(145deg, #ffffff, #f9fafb);
+      border-radius: 16px;
+      padding: 10px 11px;
+      border: 1px solid var(--border-subtle);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      color: var(--text-soft);
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .kpi-value {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      margin-bottom: 2px;
+    }
+
+    .kpi-helper {
+      font-size: 10px;
+      color: var(--text-soft);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .kpi-trend {
+      font-weight: 600;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 999px;
+    }
+
+    .kpi-trend.up {
+      background: rgba(22, 163, 74, 0.1);
+      color: #15803d;
+    }
+
+    .kpi-trend.down {
+      background: rgba(220, 38, 38, 0.08);
+      color: #b91c1c;
+    }
+
+    .kpi-spark {
+      position: absolute;
+      inset: auto 6px 6px auto;
+      width: 46px;
+      height: 20px;
+      border-radius: 999px;
+      background: linear-gradient(120deg, var(--accent-strong), transparent);
+      opacity: 0.8;
+      filter: blur(6px);
+      pointer-events: none;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.2fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .chart-card {
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid var(--border-subtle);
+      padding: 10px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-height: 220px;
+    }
+
+    .chart-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: #4b5563;
+    }
+
+    .chart-meta {
+      font-size: 10px;
+      color: var(--text-soft);
+    }
+
+    .chart-container {
+      position: relative;
+      flex: 1;
+      min-height: 140px;
+    }
+
+    .chart-container canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .map-card {
+      grid-column: span 2;
+      margin-top: 10px;
+      min-height: 260px;
+    }
+
+    #map {
+      width: 100%;
+      height: 220px;
+      border-radius: 12px;
+    }
+
+    .filters-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .filter-group-label {
+      font-size: 11px;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      font-size: 11px;
+      padding: 5px 9px;
+      background: #f9fafb;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #4b5563;
+    }
+
+    .chip.active {
+      border-color: #2563eb;
+      background: #e0edff;
+      color: #1d4ed8;
+      font-weight: 500;
+    }
+
+    .chip-indicator {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #93c5fd;
+    }
+
+    .kpi-list {
+      font-size: 11px;
+      color: var(--text-soft);
+      margin-top: 8px;
+      max-height: 260px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .kpi-list-category {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin: 8px 0 4px;
+      color: #9ca3af;
+    }
+
+    .kpi-list ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .kpi-list li::before {
+      content: "•";
+      display: inline-block;
+      width: 10px;
+      margin-left: 2px;
+      color: #9ca3af;
+    }
+
+    .kpi-list li {
+      margin: 1px 0;
+    }
+
+    .platform-list,
+    .campaign-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .platform-pill,
+    .campaign-pill {
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.14);
+      color: rgba(226, 232, 240, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .platform-pill span.label,
+    .campaign-pill span.label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.8);
+    }
+
+    .platform-pill.active,
+    .campaign-pill.active {
+      border-color: #60a5fa;
+      background: rgba(37, 99, 235, 0.35);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.5);
+    }
+
+    .platform-pill-indicator,
+    .campaign-pill-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(96, 165, 250, 0.75);
+    }
+
+    .tag-muted {
+      font-size: 10px;
+      color: rgba(148, 163, 184, 0.85);
+    }
+
+    @media (max-width: 1040px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+      }
+      aside {
+        display: none;
+      }
+    }
+
+    @media (max-width: 900px) {
+      main.dashboard-main {
+        padding: 16px;
+      }
+      .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+      .map-card {
+        grid-column: span 1;
+      }
+      .layout-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+      header.main-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .header-right {
+        align-self: stretch;
+        justify-content: space-between;
+      }
+    }
+
+    /* ---------- TEAM SECTION ---------- */
+
+    #team {
+      display: none;
+      padding: 40px 60px 60px;
+    }
+
+    .team-header {
+      margin-bottom: 20px;
+    }
+
+    .team-header h2 {
+      font-size: 26px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .team-header p {
+      font-size: 14px;
+      color: var(--text-soft);
+      max-width: 520px;
+    }
+
+    .team-grid {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .team-card {
+      background: #ffffff;
+      border-radius: 18px;
+      border: 1px solid #e5e7eb;
+      padding: 14px;
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .team-photo-placeholder {
+      width: 100%;
+      padding-top: 70%;
+      border-radius: 14px;
+      background: repeating-linear-gradient(
+        135deg,
+        #e5e7eb,
+        #e5e7eb 6px,
+        #f3f4f6 6px,
+        #f3f4f6 12px
+      );
+    }
+
+    .team-name {
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .team-role {
+      font-size: 12px;
+      color: var(--text-soft);
+    }
+
+    @media (max-width: 900px) {
+      #team {
+        padding: 28px 18px 40px;
+      }
+      .team-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .team-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- TOP NAV -->
+  <header class="top-nav">
+    <div class="top-nav-left">
+      <div class="nav-logo-square">↗</div>
+      <div class="nav-logo-text">GrowthPilot</div>
+    </div>
+    <div class="top-nav-right">
+      <button class="nav-tab active" data-section="landing">Accueil</button>
+      <button class="nav-tab" data-section="webapp">Web app</button>
+      <button class="nav-tab" data-section="team">Notre équipe</button>
+    </div>
+  </header>
+
+  <!-- LANDING / ACCUEIL -->
+  <section id="landing">
+    <div class="hero-layout">
+      <div>
+        <div class="hero-logo-block">
+          <div class="hero-logo-square">↗</div>
+          <div class="hero-logo-text">GROWTH<br>PILOT</div>
+        </div>
+        <div class="hero-copy">
+          <h2>La tour de contrôle de vos campagnes marketing.</h2>
+          <p>
+            <strong>GrowthPilot</strong> est la plateforme qui centralise vos
+            <strong>données marketing</strong> et vous donne une vision claire et immédiate de vos performances.
+          </p>
+          <p>
+            <strong>Avec des insights en temps réel et des recommandations IA</strong>,
+            vous améliorez votre ROI et prenez des décisions de campagne vraiment guidées par la data.
+          </p>
+          <div class="hero-buttons">
+            <button class="btn-primary" id="ctaWebApp">
+              Ouvrir la Web app
+              <span>↗</span>
+            </button>
+            <button class="btn-secondary">
+              Voir l’équipe
+            </button>
+          </div>
+          <div class="hero-meta">
+            Prototype UI – données 100 % fictives pour illustrer un futur dashboard GrowthPilot.
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-screen-wrapper">
+        <div class="hero-laptop">
+          <div class="hero-laptop-top">
+            <div class="hero-camera-dot"></div>
+          </div>
+          <div class="hero-screen">
+            <div class="hero-screen-bar">
+              <span>Tour de contrôle marketing – Demo</span>
+              <span>FR · 12 derniers mois</span>
+            </div>
+            <div class="hero-screen-content">
+              <div class="hero-mini-chart"></div>
+              <div class="hero-mini-card"></div>
+            </div>
+          </div>
+          <div class="hero-laptop-base"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WEB APP / DASHBOARD -->
+  <section id="webapp">
+    <div class="app-shell">
+      <aside>
+        <div class="logo-area">
+          <div class="logo-mark">GP</div>
+          <div>
+            <div class="logo-text-main">GrowthPilot</div>
+            <div class="logo-text-sub">Control Tower · France</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="sidebar-section-title">Vue</div>
+          <div class="nav-group">
+            <button class="nav-btn active" data-view="global">
+              <span class="dot"></span>Vue globale
+            </button>
+            <button class="nav-btn" data-view="platform">
+              <span class="dot"></span>Par plateforme
+            </button>
+            <button class="nav-btn" data-view="campaign">
+              <span class="dot"></span>Par campagne
+            </button>
+          </div>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <div>
+          <div class="sidebar-section-title">Plateformes</div>
+          <div class="platform-list">
+            <div class="platform-pill active" data-platform="all">
+              <span class="label">
+                <span class="platform-pill-indicator"></span> Toutes plateformes
+              </span>
+              <span class="pill-badge">Vue globale</span>
+            </div>
+            <div class="platform-pill" data-platform="Facebook Ads">
+              <span class="label">
+                <span class="platform-pill-indicator"></span> Facebook Ads
+              </span>
+              <span class="pill-badge">Paid Social</span>
+            </div>
+            <div class="platform-pill" data-platform="Instagram Ads">
+              <span class="label">
+                <span class="platform-pill-indicator"></span> Instagram Ads
+              </span>
+              <span class="pill-badge">Social</span>
+            </div>
+            <div class="platform-pill" data-platform="Google Ads">
+              <span class="label">
+                <span class="platform-pill-indicator"></span> Google Ads
+              </span>
+              <span class="pill-badge">Search · Display</span>
+            </div>
+            <div class="platform-pill" data-platform="LinkedIn Ads">
+              <span class="label">
+                <span class="platform-pill-indicator"></span> LinkedIn Ads
+              </span>
+              <span class="pill-badge">B2B</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <div>
+          <div class="sidebar-section-title">Campagnes</div>
+          <div class="campaign-list">
+            <div class="campaign-pill active" data-campaign="all">
+              <span class="label">
+                <span class="campaign-pill-indicator"></span> Toutes campagnes
+              </span>
+              <span class="pill-badge">Global</span>
+            </div>
+            <div class="campaign-pill" data-campaign="Brand Awareness FR">
+              <span class="label">
+                <span class="campaign-pill-indicator"></span> Brand Awareness FR
+              </span>
+              <span class="pill-badge">Top funnel</span>
+            </div>
+            <div class="campaign-pill" data-campaign="Lead Gen PME">
+              <span class="label">
+                <span class="campaign-pill-indicator"></span> Lead Gen PME
+              </span>
+              <span class="pill-badge">Leads</span>
+            </div>
+            <div class="campaign-pill" data-campaign="Retargeting Site Web">
+              <span class="label">
+                <span class="campaign-pill-indicator"></span> Retargeting Site Web
+              </span>
+              <span class="pill-badge">Middle funnel</span>
+            </div>
+            <div class="campaign-pill" data-campaign="Launch Nouveau Produit">
+              <span class="label">
+                <span class="campaign-pill-indicator"></span> Lancement Produit
+              </span>
+              <span class="pill-badge">Launch</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="sidebar-footnote">
+          Vue 100 % fictive conçue pour <strong>prototyper</strong> ton
+          futur dashboard de monitoring marketing multi-plateforme.
+        </p>
+      </aside>
+
+      <main class="dashboard-main">
+        <header class="main-header">
+          <div class="header-left">
+            <div class="page-title">Tour de contrôle marketing</div>
+            <div class="page-subtitle">
+              Vue centralisée de tes campagnes digitales pour PME en France
+              <span id="current-context-label">Vue globale · Toutes les plateformes</span>
+            </div>
+          </div>
+          <div class="header-right">
+            <button class="pill" id="dateRangePill">
+              <div>
+                <div class="pill-label">Période analysée</div>
+                <div class="pill-value" id="dateRangeLabel">12 derniers mois</div>
+              </div>
+            </button>
+            <div class="pill">
+              <div>
+                <div class="pill-label">Objectif global</div>
+                <div class="pill-value">ROAS &gt; 4,0 · CPA &lt; 50 €</div>
+              </div>
+            </div>
+            <div class="avatar">G</div>
+          </div>
+        </header>
+
+        <div class="layout-grid">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Vue synthétique</div>
+                <div class="panel-subtitle" id="panelSubtitle">
+                  Résumé multi-plateforme sur les 12 derniers mois (données fictives).
+                </div>
+              </div>
+              <span class="panel-badge">Prototype UI · Données dummy</span>
+            </div>
+
+            <div class="kpi-grid">
+              <div class="kpi-card">
+                <div class="kpi-label">
+                  <span>Dépenses média</span>
+                  <span class="tag-muted" id="kpiSpendContext">Toutes plateformes</span>
+                </div>
+                <div class="kpi-value" id="kpiSpend">–</div>
+                <div class="kpi-helper">
+                  <span class="kpi-trend up" id="kpiSpendTrend">+0 % vs N-1</span>
+                  <span id="kpiSpendNote">Budget contrôlé</span>
+                </div>
+                <div class="kpi-spark"></div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-label">
+                  <span>Impressions</span>
+                  <span class="tag-muted">Reach &amp; visibilité</span>
+                </div>
+                <div class="kpi-value" id="kpiImpressions">–</div>
+                <div class="kpi-helper">
+                  <span class="kpi-trend up" id="kpiImpressionsTrend">+0 %</span>
+                  <span id="kpiImpressionsNote">Parcours haut de funnel</span>
+                </div>
+                <div class="kpi-spark"></div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-label">
+                  <span>CTR moyen</span>
+                  <span class="tag-muted">Clicks / Impressions</span>
+                </div>
+                <div class="kpi-value" id="kpiCTR">–</div>
+                <div class="kpi-helper">
+                  <span class="kpi-trend up" id="kpiCTRTrend">+0,0 pts</span>
+                  <span id="kpiCTRNote">Bench secteur PME FR</span>
+                </div>
+                <div class="kpi-spark"></div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-label">
+                  <span>ROAS global</span>
+                  <span class="tag-muted">Revenue / Spend</span>
+                </div>
+                <div class="kpi-value" id="kpiROAS">–</div>
+                <div class="kpi-helper">
+                  <span class="kpi-trend up" id="kpiROASTrend">+0,0 pts</span>
+                  <span id="kpiROASNote">Objectif &gt; 4,0</span>
+                </div>
+                <div class="kpi-spark"></div>
+              </div>
+            </div>
+
+            <div class="charts-grid">
+              <div class="chart-card">
+                <div class="chart-title">Spend &amp; conversions par mois</div>
+                <div class="chart-meta" id="chart1Meta">
+                  Vue sur 12 mois – Toutes plateformes · Toutes campagnes
+                </div>
+                <div class="chart-container">
+                  <canvas id="spendChart"></canvas>
+                </div>
+              </div>
+
+              <div class="chart-card">
+                <div class="chart-title">CPC, CPA &amp; CTR</div>
+                <div class="chart-meta" id="chart2Meta">
+                  Efficacité média &amp; engagement par mois.
+                </div>
+                <div class="chart-container">
+                  <canvas id="efficiencyChart"></canvas>
+                </div>
+              </div>
+
+              <div class="chart-card map-card">
+                <div class="chart-title">Carte des campagnes – France</div>
+                <div class="chart-meta">
+                  Localisation fictive des campagnes par grande ville · couleur = plateforme · taille = budget.
+                </div>
+                <div id="map"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Filtres &amp; focus</div>
+                <div class="panel-subtitle">
+                  Choisis une plateforme et une campagne pour filtrer les KPI &amp; les graphiques.
+                </div>
+              </div>
+            </div>
+
+            <div class="filters-panel">
+              <div>
+                <div class="filter-group-label">Mode de vue</div>
+                <div class="filter-row">
+                  <button class="chip active" data-mode="global" id="modeGlobal">
+                    <span class="chip-indicator"></span> Vue globale
+                  </button>
+                  <button class="chip" data-mode="platform" id="modePlatform">
+                    <span class="chip-indicator"></span> Focus plateforme
+                  </button>
+                  <button class="chip" data-mode="campaign" id="modeCampaign">
+                    <span class="chip-indicator"></span> Focus campagne
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <div class="filter-group-label">Résumé du contexte</div>
+                <div style="font-size: 11px; color: var(--text-soft);" id="contextSummary">
+                  Tu visualises actuellement la performance agrégée de
+                  <strong>toutes les plateformes</strong> et de
+                  <strong>toutes les campagnes</strong> sur 12 mois.
+                  Sélectionne une plateforme ou une campagne à gauche pour voir l’impact sur les KPI.
+                </div>
+              </div>
+
+              <div>
+                <div class="filter-group-label">KPIs affichés dans ce MVP</div>
+                <div class="kpi-list">
+                  <div class="kpi-list-category">ROI par canal (données fictives)</div>
+                  <ul>
+                    <li>ROI Google Ads : <strong>4,3×</strong></li>
+                    <li>ROI Meta Ads (Facebook + Instagram) : <strong>3,6×</strong></li>
+                    <li>ROI LinkedIn Ads : <strong>5,1×</strong></li>
+                  </ul>
+
+                  <div class="kpi-list-category">Coût par acquisition &amp; funnel</div>
+                  <ul>
+                    <li>CPA moyen multi-plateforme : <strong>42 € / acquisition</strong></li>
+                    <li>Taux clic → lead : <strong>4,8 %</strong></li>
+                    <li>Taux lead → démo : <strong>31 %</strong></li>
+                    <li>Taux démo → client : <strong>22 %</strong></li>
+                  </ul>
+
+                  <div class="kpi-list-category">Revenu par campagne</div>
+                  <ul>
+                    <li>Brand Awareness FR : <strong>145 k€</strong> de revenu attribué</li>
+                    <li>Lead Gen PME : <strong>210 k€</strong> de revenu attribué</li>
+                    <li>Retargeting Site Web : <strong>128 k€</strong> de revenu attribué</li>
+                    <li>Lancement Produit : <strong>96 k€</strong> de revenu attribué</li>
+                  </ul>
+
+                  <div class="kpi-list-category">Alertes &amp; recommandations IA</div>
+                  <ul>
+                    <li>
+                      Alertes automatiques :
+                      <strong>3 anomalies détectées</strong> ce mois-ci
+                      (chute de trafic, hausse CPA, tracking inactif).
+                    </li>
+                    <li>
+                      Recommandations IA appliquées :
+                      <strong>9 sur 14</strong> acceptées
+                      ⇒ amélioration moyenne du ROI de <strong>+18 %</strong>.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- TEAM / NOTRE ÉQUIPE -->
+  <section id="team">
+    <div class="team-header">
+      <h2>Notre équipe</h2>
+      <p>
+        Une équipe pluridisciplinaire (data, marketing, produit) dédiée à simplifier
+        le pilotage des campagnes pour les PME. Ci-dessous, des placeholders pour illustrer
+        la future page équipe.
+      </p>
+    </div>
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="team-photo-placeholder"></div>
+        <div class="team-name">Alexandre Martin</div>
+        <div class="team-role">Co-fondateur · Produit</div>
+      </div>
+      <div class="team-card">
+        <div class="team-photo-placeholder"></div>
+        <div class="team-name">Julie Renard</div>
+        <div class="team-role">Data &amp; IA marketing</div>
+      </div>
+      <div class="team-card">
+        <div class="team-photo-placeholder"></div>
+        <div class="team-name">Thomas Leroy</div>
+        <div class="team-role">Ingénierie · Full-stack</div>
+      </div>
+      <div class="team-card">
+        <div class="team-photo-placeholder"></div>
+        <div class="team-name">Camille Robert</div>
+        <div class="team-role">Customer Success</div>
+      </div>
+      <div class="team-card">
+        <div class="team-photo-placeholder"></div>
+        <div class="team-name">Sofia Bernard</div>
+        <div class="team-role">Design &amp; UX</div>
+      </div>
+      <div class="team-card">
+        <div class="team-photo-placeholder"></div>
+        <div class="team-name">Lucas Petit</div>
+        <div class="team-role">Marketing Performance</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <script>
+    /* ---------------- NAV PRINCIPAL (Accueuil / Web app / Team) ---------------- */
+
+    const sectionMap = {
+      landing: document.getElementById("landing"),
+      webapp: document.getElementById("webapp"),
+      team: document.getElementById("team"),
+    };
+
+    const navTabs = document.querySelectorAll(".nav-tab");
+
+    function showSection(name) {
+      Object.entries(sectionMap).forEach(([key, el]) => {
+        el.style.display = key === name ? "block" : "none";
+      });
+      navTabs.forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.section === name);
+      });
+
+      if (name === "webapp") {
+        // Inicializar mapa la primera vez que se abre la web app
+        if (!window.__mapInitialized) {
+          initMap();
+          window.__mapInitialized = true;
+        } else if (window.mapInstance) {
+          setTimeout(() => {
+            mapInstance.invalidateSize();
+          }, 200);
+        }
+      }
+    }
+
+    navTabs.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        showSection(btn.dataset.section);
+      });
+    });
+
+    // CTA del hero
+    const ctaWebApp = document.getElementById("ctaWebApp");
+    ctaWebApp.addEventListener("click", () => {
+      showSection("webapp");
+    });
+
+    // También podemos hacer que el botón "Voir l’équipe" vaya a la sección team
+    document.querySelector(".btn-secondary").addEventListener("click", () => {
+      showSection("team");
+    });
+
+    // Mostrar landing por defecto
+    showSection("landing");
+
+    /* ---------------- DATOS FICTICIOS Y DASHBOARD ---------------- */
+
+    const monthLabels = (() => {
+      const labels = [];
+      const now = new Date();
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const month = d.toLocaleString("fr-FR", { month: "short" });
+        labels.push(month.charAt(0).toUpperCase() + month.slice(1) + " " + d.getFullYear());
+      }
+      return labels;
+    })();
+
+    // Helper para generar series aleatorias pero coherentes
+    function generateSeries(base, variance) {
+      const values = [];
+      for (let i = 0; i < 12; i++) {
+        const delta = (Math.random() * 2 - 1) * variance;
+        const v = Math.max(0, base + delta * (0.6 + (i / 12)));
+        values.push(Math.round(v));
+      }
+      return values;
+    }
+
+    const platformData = {
+      "Facebook Ads": {
+        color: "#1877f2",
+        spend: generateSeries(2800, 600),
+        impressions: generateSeries(220000, 45000),
+        clicks: generateSeries(8800, 1800),
+        conversions: generateSeries(480, 120),
+        revenue: generateSeries(12000, 3000),
+      },
+      "Instagram Ads": {
+        color: "#db2777",
+        spend: generateSeries(1900, 500),
+        impressions: generateSeries(180000, 38000),
+        clicks: generateSeries(7200, 1500),
+        conversions: generateSeries(360, 90),
+        revenue: generateSeries(9000, 2500),
+      },
+      "Google Ads": {
+        color: "#f97316",
+        spend: generateSeries(3400, 800),
+        impressions: generateSeries(260000, 60000),
+        clicks: generateSeries(13200, 2600),
+        conversions: generateSeries(720, 160),
+        revenue: generateSeries(21000, 4500),
+      },
+      "LinkedIn Ads": {
+        color: "#0a66c2",
+        spend: generateSeries(2100, 600),
+        impressions: generateSeries(98000, 21000),
+        clicks: generateSeries(2600, 700),
+        conversions: generateSeries(210, 70),
+        revenue: generateSeries(14000, 3500),
+      },
+    };
+
+    function aggregateAllPlatforms() {
+      const all = {
+        color: "#2563eb",
+        spend: Array(12).fill(0),
+        impressions: Array(12).fill(0),
+        clicks: Array(12).fill(0),
+        conversions: Array(12).fill(0),
+        revenue: Array(12).fill(0),
+      };
+      Object.values(platformData).forEach((p) => {
+        for (let i = 0; i < 12; i++) {
+          all.spend[i] += p.spend[i];
+          all.impressions[i] += p.impressions[i];
+          all.clicks[i] += p.clicks[i];
+          all.conversions[i] += p.conversions[i];
+          all.revenue[i] += p.revenue[i];
+        }
+      });
+      return all;
+    }
+
+    const allPlatformsData = aggregateAllPlatforms();
+
+    // Campagnes fictives
+    const campaigns = [
+      { name: "Brand Awareness FR", weight: 0.28 },
+      { name: "Lead Gen PME", weight: 0.32 },
+      { name: "Retargeting Site Web", weight: 0.22 },
+      { name: "Launch Nouveau Produit", weight: 0.18 },
+    ];
+
+    function computeCampaignData() {
+      const map = {};
+      campaigns.forEach((c) => {
+        map[c.name] = {
+          spend: Array(12).fill(0),
+          impressions: Array(12).fill(0),
+          clicks: Array(12).fill(0),
+          conversions: Array(12).fill(0),
+          revenue: Array(12).fill(0),
+        };
+      });
+
+      const all = allPlatformsData;
+      campaigns.forEach((c) => {
+        for (let i = 0; i < 12; i++) {
+          map[c.name].spend[i] = Math.round(all.spend[i] * c.weight);
+          map[c.name].impressions[i] = Math.round(all.impressions[i] * c.weight);
+          map[c.name].clicks[i] = Math.round(all.clicks[i] * c.weight);
+          map[c.name].conversions[i] = Math.round(all.conversions[i] * c.weight);
+          map[c.name].revenue[i] = Math.round(all.revenue[i] * c.weight * (1.1 + (Math.random() - 0.5) * 0.3));
+        }
+      });
+      return map;
+    }
+
+    const campaignData = computeCampaignData();
+
+    function sum(arr) {
+      return arr.reduce((a, b) => a + b, 0);
+    }
+
+    function formatCurrencyEuros(value) {
+      return new Intl.NumberFormat("fr-FR", {
+        style: "currency",
+        currency: "EUR",
+        maximumFractionDigits: 0,
+      }).format(value);
+    }
+
+    function formatInteger(value) {
+      return new Intl.NumberFormat("fr-FR", {
+        maximumFractionDigits: 0,
+      }).format(value);
+    }
+
+    function computeMetrics(dataset) {
+      const spend = sum(dataset.spend);
+      const impressions = sum(dataset.impressions);
+      const clicks = sum(dataset.clicks);
+      const conversions = sum(dataset.conversions);
+      const revenue = sum(dataset.revenue);
+
+      const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
+      const cpc = clicks > 0 ? spend / clicks : 0;
+      const cpa = conversions > 0 ? spend / conversions : 0;
+      const roas = spend > 0 ? revenue / spend : 0;
+
+      return { spend, impressions, clicks, conversions, revenue, ctr, cpc, cpa, roas };
+    }
+
+    let spendChart, efficiencyChart, mapInstance;
+
+    function buildSpendChart(ctx, labels, dataset, color) {
+      return new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "Dépenses média (€)",
+              data: dataset.spend,
+              yAxisID: "y",
+              backgroundColor: "rgba(37, 99, 235, 0.18)",
+              borderColor: color,
+              borderWidth: 1.5,
+              borderRadius: 999,
+              maxBarThickness: 26,
+            },
+            {
+              label: "Conversions",
+              data: dataset.conversions,
+              yAxisID: "y1",
+              type: "line",
+              borderColor: "#16a34a",
+              backgroundColor: "rgba(22, 163, 74, 0.12)",
+              borderWidth: 2,
+              tension: 0.35,
+              pointRadius: 3,
+              pointHoverRadius: 4,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              position: "left",
+              ticks: {
+                callback: (v) => (v >= 1000 ? formatInteger(v / 1000) + " k€" : v + " €"),
+                font: { size: 10 },
+              },
+              grid: { drawBorder: false },
+            },
+            y1: {
+              position: "right",
+              grid: { drawOnChartArea: false, drawBorder: false },
+              ticks: { font: { size: 10 } },
+            },
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 10 } },
+            },
+          },
+          plugins: {
+            legend: {
+              display: true,
+              labels: { font: { size: 10 } },
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  if (ctx.datasetIndex === 0) {
+                    return "Dépenses : " + formatCurrencyEuros(ctx.parsed.y);
+                  }
+                  return "Conversions : " + formatInteger(ctx.parsed.y);
+                },
+              },
+            },
+          },
+        },
+      });
+    }
+
+    function buildEfficiencyChart(ctx, labels, dataset) {
+      const cpcSeries = dataset.spend.map((s, i) =>
+        dataset.clicks[i] > 0 ? s / dataset.clicks[i] : 0
+      );
+      const cpaSeries = dataset.spend.map((s, i) =>
+        dataset.conversions[i] > 0 ? s / dataset.conversions[i] : 0
+      );
+      const ctrSeries = dataset.impressions.map((imp, i) =>
+        imp > 0 ? (dataset.clicks[i] / imp) * 100 : 0
+      );
+
+      return new Chart(ctx, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "CPC moyen (€)",
+              data: cpcSeries,
+              borderColor: "#0ea5e9",
+              backgroundColor: "rgba(14, 165, 233, 0.1)",
+              borderWidth: 2,
+              tension: 0.35,
+              pointRadius: 3,
+              pointHoverRadius: 4,
+              yAxisID: "y",
+            },
+            {
+              label: "CPA moyen (€)",
+              data: cpaSeries,
+              borderColor: "#6366f1",
+              backgroundColor: "rgba(99, 102, 241, 0.1)",
+              borderWidth: 2,
+              tension: 0.35,
+              pointRadius: 3,
+              pointHoverRadius: 4,
+              yAxisID: "y",
+            },
+            {
+              label: "CTR (%)",
+              data: ctrSeries,
+              borderColor: "#22c55e",
+              backgroundColor: "rgba(34, 197, 94, 0.1)",
+              borderWidth: 2,
+              borderDash: [4, 3],
+              tension: 0.35,
+              pointRadius: 3,
+              pointHoverRadius: 4,
+              yAxisID: "y1",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              position: "left",
+              ticks: {
+                font: { size: 10 },
+                callback: (v) => v.toFixed(0) + " €",
+              },
+              grid: { drawBorder: false },
+            },
+            y1: {
+              position: "right",
+              ticks: {
+                font: { size: 10 },
+                callback: (v) => v + " %",
+              },
+              grid: { drawBorder: false, drawOnChartArea: false },
+            },
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 10 } },
+            },
+          },
+          plugins: {
+            legend: {
+              display: true,
+              labels: { font: { size: 10 } },
+            },
+          },
+        },
+      });
+    }
+
+    /* --------------- MAP LEAFLET (se inicializa al abrir Web app) --------------- */
+
+    function initMap() {
+      mapInstance = L.map("map", { zoomControl: false }).setView([46.8, 2.4], 5.6);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+      }).addTo(mapInstance);
+
+      const cityCampaigns = [
+        {
+          city: "Paris",
+          coords: [48.8566, 2.3522],
+          platform: "Facebook Ads",
+          campaign: "Brand Awareness FR",
+          spendShare: 0.22,
+        },
+        {
+          city: "Lyon",
+          coords: [45.764, 4.8357],
+          platform: "Google Ads",
+          campaign: "Lead Gen PME",
+          spendShare: 0.18,
+        },
+        {
+          city: "Marseille",
+          coords: [43.2965, 5.3698],
+          platform: "Instagram Ads",
+          campaign: "Launch Nouveau Produit",
+          spendShare: 0.15,
+        },
+        {
+          city: "Lille",
+          coords: [50.6292, 3.0573],
+          platform: "LinkedIn Ads",
+          campaign: "Lead Gen PME",
+          spendShare: 0.12,
+        },
+        {
+          city: "Bordeaux",
+          coords: [44.8378, -0.5792],
+          platform: "Facebook Ads",
+          campaign: "Retargeting Site Web",
+          spendShare: 0.1,
+        },
+        {
+          city: "Toulouse",
+          coords: [43.6047, 1.4442],
+          platform: "Google Ads",
+          campaign: "Retargeting Site Web",
+          spendShare: 0.09,
+        },
+      ];
+
+      const totalSpend = sum(allPlatformsData.spend);
+
+      cityCampaigns.forEach((c) => {
+        const platform = platformData[c.platform];
+        const color = platform ? platform.color : "#6b7280";
+        const citySpend = totalSpend * c.spendShare;
+        const radius = 10 + 25 * c.spendShare;
+
+        const circle = L.circleMarker(c.coords, {
+          radius,
+          color,
+          weight: 1,
+          fillOpacity: 0.35,
+        }).addTo(mapInstance);
+
+        const approxImpressions = citySpend * 50;
+
+        circle.bindPopup(
+          "<strong>" +
+            c.city +
+            "</strong><br>" +
+            "Plateforme : " +
+            c.platform +
+            "<br>" +
+            "Campagne : " +
+            c.campaign +
+            "<br>" +
+            "Dépenses estimées : " +
+            formatCurrencyEuros(citySpend) +
+            "<br>" +
+            "Impressions estimées : " +
+            formatInteger(approxImpressions)
+        );
+      });
+    }
+
+    /* --------------- ACTUALIZACIÓN DEL DASHBOARD --------------- */
+
+    const kpiSpendEl = document.getElementById("kpiSpend");
+    const kpiImpressionsEl = document.getElementById("kpiImpressions");
+    const kpiCTREl = document.getElementById("kpiCTR");
+    const kpiROASEl = document.getElementById("kpiROAS");
+
+    const kpiSpendContextEl = document.getElementById("kpiSpendContext");
+    const contextLabelEl = document.getElementById("current-context-label");
+    const contextSummaryEl = document.getElementById("contextSummary");
+    const panelSubtitleEl = document.getElementById("panelSubtitle");
+    const chart1MetaEl = document.getElementById("chart1Meta");
+    const chart2MetaEl = document.getElementById("chart2Meta");
+
+    const modeGlobalChip = document.getElementById("modeGlobal");
+    const modePlatformChip = document.getElementById("modePlatform");
+    const modeCampaignChip = document.getElementById("modeCampaign");
+
+    let currentPlatform = "all";
+    let currentCampaign = "all";
+    let currentMode = "global";
+
+    function getCurrentDataset() {
+      if (currentMode === "platform" && currentPlatform !== "all") {
+        return platformData[currentPlatform];
+      }
+      if (currentMode === "campaign" && currentCampaign !== "all") {
+        return campaignData[currentCampaign];
+      }
+      return allPlatformsData;
+    }
+
+    function getContextText() {
+      let parts = [];
+      if (currentPlatform === "all") {
+        parts.push("toutes les plateformes");
+      } else {
+        parts.push('la plateforme “' + currentPlatform + "”");
+      }
+      if (currentCampaign === "all") {
+        parts.push("toutes les campagnes");
+      } else {
+        parts.push('la campagne “' + currentCampaign + "”");
+      }
+      return parts.join(" · ");
+    }
+
+    function updateModeChips() {
+      [modeGlobalChip, modePlatformChip, modeCampaignChip].forEach((chip) => {
+        chip.classList.remove("active");
+      });
+      if (currentMode === "global") {
+        modeGlobalChip.classList.add("active");
+      } else if (currentMode === "platform") {
+        modePlatformChip.classList.add("active");
+      } else if (currentMode === "campaign") {
+        modeCampaignChip.classList.add("active");
+      }
+    }
+
+    function updateDashboard() {
+      const ds = getCurrentDataset();
+      const metrics = computeMetrics(ds);
+
+      kpiSpendEl.textContent = formatCurrencyEuros(metrics.spend);
+      kpiImpressionsEl.textContent = formatInteger(metrics.impressions) + " vues";
+      kpiCTREl.textContent = metrics.ctr.toFixed(2) + " %";
+      kpiROASEl.textContent = metrics.roas.toFixed(2) + "×";
+
+      const ctxText = getContextText();
+      kpiSpendContextEl.textContent = ctxText;
+      contextLabelEl.textContent =
+        (currentMode === "global" ? "Vue globale · " : "") +
+        ctxText.charAt(0).toUpperCase() +
+        ctxText.slice(1);
+      panelSubtitleEl.textContent =
+        "Résumé de la performance pour " +
+        ctxText +
+        " sur les 12 derniers mois (données fictives).";
+      chart1MetaEl.textContent = "Spend & conversions mensuels · " + ctxText;
+      chart2MetaEl.textContent = "CPC, CPA & CTR mensuels · " + ctxText;
+
+      contextSummaryEl.innerHTML =
+        'Tu visualises actuellement <strong>' +
+        ctxText +
+        "</strong>. Le graphique de gauche met en regard le budget média et les conversions, " +
+        "tandis que le second synthétise la qualité du trafic (CPC, CPA, CTR).";
+
+      if (spendChart) spendChart.destroy();
+      if (efficiencyChart) efficiencyChart.destroy();
+
+      const spendCtx = document.getElementById("spendChart").getContext("2d");
+      const effCtx = document.getElementById("efficiencyChart").getContext("2d");
+      const color =
+        currentPlatform !== "all" && currentMode === "platform"
+          ? platformData[currentPlatform].color
+          : "#2563eb";
+
+      spendChart = buildSpendChart(spendCtx, monthLabels, ds, color);
+      efficiencyChart = buildEfficiencyChart(effCtx, monthLabels, ds);
+      updateModeChips();
+    }
+
+    function initInteractions() {
+      document.querySelectorAll(".platform-pill").forEach((el) => {
+        el.addEventListener("click", () => {
+          document.querySelectorAll(".platform-pill").forEach((p) =>
+            p.classList.remove("active")
+          );
+          el.classList.add("active");
+          currentPlatform = el.getAttribute("data-platform");
+          if (currentPlatform !== "all") {
+            currentMode = "platform";
+          } else if (currentCampaign !== "all") {
+            currentMode = "campaign";
+          } else {
+            currentMode = "global";
+          }
+          updateDashboard();
+        });
+      });
+
+      document.querySelectorAll(".campaign-pill").forEach((el) => {
+        el.addEventListener("click", () => {
+          document.querySelectorAll(".campaign-pill").forEach((p) =>
+            p.classList.remove("active")
+          );
+          el.classList.add("active");
+          currentCampaign = el.getAttribute("data-campaign");
+          if (currentCampaign !== "all") {
+            currentMode = "campaign";
+          } else if (currentPlatform !== "all") {
+            currentMode = "platform";
+          } else {
+            currentMode = "global";
+          }
+          updateDashboard();
+        });
+      });
+
+      modeGlobalChip.addEventListener("click", () => {
+        currentMode = "global";
+        currentPlatform = "all";
+        currentCampaign = "all";
+        document.querySelectorAll(".platform-pill").forEach((p) =>
+          p.classList.remove("active")
+        );
+        document
+          .querySelector('.platform-pill[data-platform="all"]')
+          .classList.add("active");
+        document.querySelectorAll(".campaign-pill").forEach((p) =>
+          p.classList.remove("active")
+        );
+        document
+          .querySelector('.campaign-pill[data-campaign="all"]')
+          .classList.add("active");
+        updateDashboard();
+      });
+
+      modePlatformChip.addEventListener("click", () => {
+        currentMode = "platform";
+        if (currentPlatform === "all") {
+          currentPlatform = "Facebook Ads";
+          document.querySelectorAll(".platform-pill").forEach((p) =>
+            p.classList.remove("active")
+          );
+          document
+            .querySelector('.platform-pill[data-platform="Facebook Ads"]')
+            .classList.add("active");
+        }
+        updateDashboard();
+      });
+
+      modeCampaignChip.addEventListener("click", () => {
+        currentMode = "campaign";
+        if (currentCampaign === "all") {
+          currentCampaign = "Lead Gen PME";
+          document.querySelectorAll(".campaign-pill").forEach((p) =>
+            p.classList.remove("active")
+          );
+          document
+            .querySelector('.campaign-pill[data-campaign="Lead Gen PME"]')
+            .classList.add("active");
+        }
+        updateDashboard();
+      });
+    }
+
+    // Init del dashboard al cargar (sin mapa, que se inicializa al abrir la sección)
+    window.addEventListener("load", () => {
+      initInteractions();
+      updateDashboard();
+    });
+  </script>
+</body>
+</html>

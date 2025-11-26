@@ -16,6 +16,13 @@ Growth Pilot es una plataforma pensada para facilitar el crecimiento de proyecto
  cd growth-pilot
 ```
 
+3. Abre la experiencia web estática:
+```bash
+# Solo necesitas un navegador. Si tienes Python instalado puedes lanzar un servidor local:
+python -m http.server 8000
+# Luego visita http://localhost:8000 en tu navegador y abre `index.html`.
+```
+
 ## Pull y Commit (Colaboración)
 
 - Para obtener la última versión usa:
